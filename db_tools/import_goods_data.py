@@ -19,22 +19,24 @@ from goods.models import Goods, GoodsCategory, GoodsImage
 
 from db_tools.data.product_data import row_data
 
-for good_cat in row_data:
+for goods_detail in row_data:
     goods = Goods()
-    goods.name = good_cat['name']
-    goods.market_price = float(good_cat['market_price'].replace('￥', '').replace('元', ''))
-    goods.shop_price = float(good_cat['sale_price'].replace('￥', '').replace('元', ''))
-    goods.good_brief = good_cat['desc'] if good_cat['desc'] is None else ''
-    goods.good_desc = good_cat['goods_desc'] if good_cat['goods_desc'] is None else ''
-    goods.goods_front_image = good_cat['images'][0] if good_cat['images'] else ''
-    category_name = good_cat["categorys"][-1]
-    categorys = GoodsCategory.objects.filter(name=category_name)
-    if categorys:
-        goods.category = categorys[0]
+    goods.name = goods_detail["name"]
+    goods.market_price = float(int(goods_detail["market_price"].replace("￥", "").replace("元", "")))
+    goods.shop_price = float(int(goods_detail["sale_price"].replace("￥", "").replace("元", "")))
+    goods.goods_brief = goods_detail["desc"] if goods_detail["desc"] is not None else ""
+    goods.goods_desc = goods_detail["goods_desc"] if goods_detail["goods_desc"] is not None else ""
+    goods.goods_front_image = goods_detail["images"][0] if goods_detail["images"] else ""
+
+    category_name = goods_detail["categorys"][-1]
+    category = GoodsCategory.objects.filter(name=category_name)
+    if category:
+        goods.category = category[0]
     goods.save()
-    for goods_img in good_cat['images']:
-        images = GoodsImage()
-        images.goods = goods
-        images.image = goods_img
-        images.save()
+
+    for goods_image in goods_detail["images"]:
+        goods_image_instance = GoodsImage()
+        goods_image_instance.image = goods_image
+        goods_image_instance.goods = goods
+        goods_image_instance.save()
 
